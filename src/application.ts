@@ -8,7 +8,7 @@ import {
 } from '@loopback/rest-explorer';
 import {ServiceMixin} from '@loopback/service-proxy';
 import path from 'path';
-import {TokenServiceConstants} from './keys';
+import {TokenServiceBindings, TokenServiceConstants} from './keys';
 import {MySequence} from './sequence';
 import {BcryptHasher} from './services/hash.password.bcrypt';
 import {JWTService} from './services/jwt-service';
@@ -74,17 +74,20 @@ export class Rnd1Application extends BootMixin(
 
     //-------------------- JWT
     this.bind('services.jwt.service').toClass(JWTService)
+    //this.bind(TokenServiceBindings.TOKEN_SERVICE).toClass(JWTService)
     //-------------------- /JWT
 
 
     //-------------------- JWT SECRETKEY CONSTANT VALUE
     //this.bind('authentication.jwt.secret').to('eki123secretkey')
-    this.bind('authentication.jwt.secret').to(TokenServiceConstants.TOKEN_SECRET_VALUE);
+    //this.bind('authentication.jwt.secret').to(TokenServiceConstants.TOKEN_SECRET_VALUE);
+    this.bind(TokenServiceBindings.TOKEN_SECRET).to(TokenServiceConstants.TOKEN_SECRET_VALUE);
     //-------------------- /JWT SECRETKEY CONSTANT VALUE
 
     //-------------------- JWT EXPIRESIN CONSTANT VALUE
     //this.bind('authentication.jwt.expiresin').to('7h')
-    this.bind('authentication.jwt.expiresin').to(TokenServiceConstants.TOKEN_EXPIRES_IN_VALUE)
+    //this.bind('authentication.jwt.expiresin').to(TokenServiceConstants.TOKEN_EXPIRES_IN_VALUE)
+    this.bind(TokenServiceBindings.TOKEN_EXPIRES_IN).to(TokenServiceConstants.TOKEN_EXPIRES_IN_VALUE)
     //-------------------- /JWT EXPIRESIN CONSTANT VALUE
 
   }
