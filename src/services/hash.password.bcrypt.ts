@@ -1,10 +1,11 @@
-import { inject } from '@loopback/core';
-import { compare, genSalt, hash } from 'bcryptjs';
+import {inject} from '@loopback/core';
+import {compare, genSalt, hash} from 'bcryptjs';
 
-interface PasswordHasher<T = string> {
+export interface PasswordHasher<T = string> {
+    //interface PasswordHasher<T = string> {
     hashPassword(password: T): Promise<T>;
     //--- agar user-service.ts tidak error
-    //comparePassword(<input password>: T, <<password database>>: T) : 
+    //comparePassword(<input password>: T, <<password database>>: T) :
     comparePassword(providedPass: T, storedPass: T): Promise<boolean>
     //--- agar user-service.ts tidak error
 }

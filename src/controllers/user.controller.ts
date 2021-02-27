@@ -1,16 +1,16 @@
 // Uncomment these imports to begin using these cool features!
 
-import { repository } from "@loopback/repository";
-import { getJsonSchemaRef, post, requestBody } from "@loopback/rest";
-import { User } from "../models";
-import { Credentials, UserRepository } from "../repositories";
-import { validateCredentials } from "../services/validator";
+import {inject} from "@loopback/core";
+import {repository} from "@loopback/repository";
+import {getJsonSchemaRef, post, requestBody} from "@loopback/rest";
 import * as _ from 'lodash';
-import { inject } from "@loopback/core";
-import { BcryptHasher } from "../services/hash.password.bcrypt";
-import { CredentialsRequestBody } from "./specs/user.controller.spec";
-import { MyUserService } from "../services/user-service";
-import { JWTService } from "../services/jwt-service";
+import {User} from "../models";
+import {Credentials, UserRepository} from "../repositories";
+import {BcryptHasher} from "../services/hash.password.bcrypt";
+import {JWTService} from "../services/jwt-service";
+import {MyUserService} from "../services/user-service";
+import {validateCredentials} from "../services/validator";
+import {CredentialsRequestBody} from "./specs/user.controller.spec";
 // import  * as UCS from "./specs/user.controller.spec";
 
 
@@ -18,7 +18,7 @@ export class UserController {
   constructor(
     @repository(UserRepository)
     public UserRepository: UserRepository,
-    @inject('service.hasher')
+    @inject('services.hasher')
     public hasher: BcryptHasher,
     @inject('services.user.service')
     public userService: MyUserService,
@@ -47,7 +47,7 @@ export class UserController {
   //-------------- FIX BUG SWEGGER - SEBELUMNYA ------------------
 
 
-  //-------------- FIX BUG SWEGGER 
+  //-------------- FIX BUG SWEGGER
 
   //  Resolver error at paths./signup.post.responses.200.content.schema.$ref
   //  Could not resolve reference: Could not resolve pointer: /definitions/User does not exist in document
@@ -64,7 +64,7 @@ export class UserController {
     }
 
   })
-  //-------------- FIX BUG SWEGGER 
+  //-------------- FIX BUG SWEGGER
 
   async signup(@requestBody() userData: User) {
     validateCredentials(_.pick(userData, ['email', 'password']))
@@ -108,7 +108,7 @@ export class UserController {
 
   async login(
     @requestBody(CredentialsRequestBody) credentials: Credentials,
-  ): Promise<{ token: string }> {
+  ): Promise<{token: string}> {
 
     //--------------------------- tambahan user.controller.spec -> user-service -> user controller  -> application ts -> await user controller
     //  await this.userService.verifyCredentials(credentials);
@@ -127,7 +127,7 @@ export class UserController {
     // selanjutnya generate JSON WEB TOKEN
     const token = await this.jwtService.generateToken(userProfile);
     // return Promise.resolve({ token: '12312311adadasdasda' })
-    return Promise.resolve({ token })
+    return Promise.resolve({token})
   }
   //----------------- Creating Login Route
 }

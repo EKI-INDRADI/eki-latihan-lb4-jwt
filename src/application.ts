@@ -8,7 +8,7 @@ import {
 } from '@loopback/rest-explorer';
 import {ServiceMixin} from '@loopback/service-proxy';
 import path from 'path';
-import {TokenServiceBindings, TokenServiceConstants} from './keys';
+import {PasswordHashserBindings, TokenServiceBindings, TokenServiceConstants, UserServiceBindings} from './keys';
 import {MySequence} from './sequence';
 import {BcryptHasher} from './services/hash.password.bcrypt';
 import {JWTService} from './services/jwt-service';
@@ -60,21 +60,27 @@ export class Rnd1Application extends BootMixin(
   // set up the custom sequence
 
   setupBinding(): void {
-    this.bind('service.hasher').toClass(BcryptHasher);
-
+    // this.bind('service.hasher').toClass(BcryptHasher);
     // ctrl+space BcryptHasher enter (biar ke import)
 
+    this.bind(PasswordHashserBindings.PASSWORD_HASHSER).toClass(BcryptHasher);
+
+
     //--------------------------- tambahan
-    this.bind('rounds').to(10);
+    // this.bind('rounds').to(10);
+    this.bind(PasswordHashserBindings.ROUNDS).to(10);
     //--------------------------- /tambahan
 
     //--------------------------- tambahan user.controller.spec -> user-service -> user controller  -> application ts
-    this.bind('services.user.service').toClass(MyUserService)
+
+    //this.bind('services.user.service').toClass(MyUserService)
+    this.bind(UserServiceBindings.USER_SERVICE).toClass(MyUserService)
     //--------------------------- /tambahan user.controller.spec -> user-service -> user controller  -> application ts
 
     //-------------------- JWT
-    this.bind('services.jwt.service').toClass(JWTService)
-    //this.bind(TokenServiceBindings.TOKEN_SERVICE).toClass(JWTService)
+    // this.bind('services.jwt.service').toClass(JWTService)
+    // this.bind(TokenServiceBindings.TOKEN_SERVICE).toClass(JWTService) // error
+    this.bind(TokenServiceBindings.TOKEN_SERVICE).toClass(JWTService) // menit  Refactoring Binding Keys to separate file
     //-------------------- /JWT
 
 
