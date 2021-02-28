@@ -1,19 +1,20 @@
-import { BootMixin } from '@loopback/boot';
-import { ApplicationConfig } from '@loopback/core';
+import {BootMixin} from '@loopback/boot';
+import {ApplicationConfig} from '@loopback/core';
+import {RepositoryMixin} from '@loopback/repository';
+import {RestApplication} from '@loopback/rest';
 import {
   RestExplorerBindings,
-  RestExplorerComponent,
+  RestExplorerComponent
 } from '@loopback/rest-explorer';
-import { RepositoryMixin } from '@loopback/repository';
-import { RestApplication } from '@loopback/rest';
-import { ServiceMixin } from '@loopback/service-proxy';
+import {ServiceMixin} from '@loopback/service-proxy';
 import path from 'path';
-import { MySequence } from './sequence';
-import { BcryptHasher } from './services/hash.password.bcrypt';
-import { MyUserService } from './services/user-service';
-import { JWTService } from './services/jwt-service';
+import {TokenServiceConstants} from './keys';
+import {MySequence} from './sequence';
+import {BcryptHasher} from './services/hash.password.bcrypt';
+import {JWTService} from './services/jwt-service';
+import {MyUserService} from './services/user-service';
 
-export { ApplicationConfig };
+export {ApplicationConfig};
 
 export class Rnd1Application extends BootMixin(
   ServiceMixin(RepositoryMixin(RestApplication)),
@@ -77,11 +78,13 @@ export class Rnd1Application extends BootMixin(
 
 
     //-------------------- JWT SECRETKEY CONSTANT VALUE
-    this.bind('authentication.jwt.secret').to('eki123secretkey')
+    //this.bind('authentication.jwt.secret').to('eki123secretkey')
+    this.bind('authentication.jwt.secret').to(TokenServiceConstants.TOKEN_SECRET_VALUE);
     //-------------------- /JWT SECRETKEY CONSTANT VALUE
 
     //-------------------- JWT EXPIRESIN CONSTANT VALUE
-    this.bind('authentication.jwt.expiresin').to('7h')
+    //this.bind('authentication.jwt.expiresin').to('7h')
+    this.bind('authentication.jwt.expiresin').to(TokenServiceConstants.TOKEN_EXPIRES_IN_VALUE)
     //-------------------- /JWT EXPIRESIN CONSTANT VALUE
 
   }
