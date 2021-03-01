@@ -101,9 +101,12 @@ export class MyUserService implements UserService<User, Credentials>{
 
 
         //FIX securityID https://www.udemy.com/course/loopback-4-the-complete-developers-guide/learn/lecture/15865448#questions/8162782
+
+        // mirip contoh :
         const userProfile: UserProfile = {
-            [securityId]: `${user.id}`,
+            id: user.id,
             name: userName,
+            [securityId]: `${user.id}`,
         };
         return userProfile;
         //FIX securityID https://www.udemy.com/course/loopback-4-the-complete-developers-guide/learn/lecture/15865448#questions/8162782
