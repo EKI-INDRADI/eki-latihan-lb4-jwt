@@ -1,12 +1,14 @@
 // loopback4 lama :
 // import {  UserProfile } from '@loopback/authentication';
 // loopback 4 baru :
+// import {UserProfile} from '@loopback/security';
+// infonya : https://loopback.io/doc/en/lb4/Security.html
+import {inject} from '@loopback/core';
+import {HttpErrors} from '@loopback/rest';
+//import {UserProfile} from '@loopback/security';
+import {securityId, UserProfile} from '@loopback/security'; // FIX securityID //https://www.udemy.com/course/loopback-4-the-complete-developers-guide/learn/lecture/15865448#questions/8162782
+import {promisify} from 'util'; // util == utility    , untuk convert callback to promise
 
-import { HttpErrors } from '@loopback/rest';
-import { UserProfile } from '@loopback/security';
-
-import { promisify } from 'util'; // util == utility    , untuk convert callback to promise
-import { inject } from '@loopback/core';
 
 const jwt = require('jsonwebtoken');
 const signAsync = promisify(jwt.sign);
@@ -54,4 +56,30 @@ export class JWTService {
         return token;
 
     }
+
+
+    //=========== fix jwt src\application.ts
+    // this.bind(TokenServiceBindings.TOKEN_SERVICE).toClass(JWTService)
+    // fix JWTService 7:41
+
+    async verifyToken(token: string): Promise<UserProfile> {
+        //https://www.udemy.com/course/loopback-4-the-complete-developers-guide/learn/lecture/15865448#questions/8162782
+
+        // return Promise.resolve({name: 'Haider', id: '1'});
+
+        //https://www.udemy.com/course/loopback-4-the-complete-developers-guide/learn/lecture/15865448#questions/8162782
+
+        //PROBLEM SOLVED LOOPBACK4 NEW VERSION :
+        const userProfile: UserProfile = {[securityId]: '1', name: 'Eki'};
+        return Promise.resolve(userProfile);
+
+
+    }
+
+
+
+    //=========== next
+
+
+
 }

@@ -1,11 +1,12 @@
-import { UserService } from '@loopback/authentication';
-import { UserProfile } from '@loopback/security';
-import { User } from '../models';
-import { Credentials, UserRepository } from '../repositories/user.repository';
-import { repository } from '@loopback/repository';
-import { HttpErrors } from '@loopback/rest';
-import { inject } from '@loopback/core';
-import { BcryptHasher } from './hash.password.bcrypt';
+import {UserService} from '@loopback/authentication';
+import {inject} from '@loopback/core';
+import {repository} from '@loopback/repository';
+import {HttpErrors} from '@loopback/rest';
+//import { UserProfile } from '@loopback/security';
+import {securityId, UserProfile} from '@loopback/security'; // FIX SecurityID https://www.udemy.com/course/loopback-4-the-complete-developers-guide/learn/lecture/15865448#questions/8162782
+import {User} from '../models';
+import {Credentials, UserRepository} from '../repositories/user.repository';
+import {BcryptHasher} from './hash.password.bcrypt';
 
 
 export class MyUserService implements UserService<User, Credentials>{
@@ -84,17 +85,30 @@ export class MyUserService implements UserService<User, Credentials>{
         // Property '[securityId]' is missing in type '{ id: number | undefined; name: string; }' but required in type 'UserProfile'.ts(2741)
         // maka sesuaikan tipe data dari   src\models\user.model.ts
 
-        //  return {id: `${user.id}`, name: userName} // <<<---- ERRROR
 
-        // gantinya pakai ini
-        let var_userid_string = String(user.id)
-        // var_return : any = {string, string}
-        let var_return: any = { id: var_userid_string, name: userName }
-        // console.log("var_return :")
-        // console.log(var_return)
-        return (var_return)
+        // ==============================code sendiri ===================
+        // ----info : return {id: `${user.id}`, name: userName} // <<<---- ERRROR
 
-        // lanjut ke user.controller
+        // ----info : gantinya pakai ini
+        // let var_userid_string = String(user.id) // di ganti,  FIX securityID https://www.udemy.com/course/loopback-4-the-complete-developers-guide/learn/lecture/15865448#questions/8162782
+        // ----info : var_return : any = {string, string}
+        // let var_return: any = { id: var_userid_string, name: userName } // di ganti, FIX securityID https://www.udemy.com/course/loopback-4-the-complete-developers-guide/learn/lecture/15865448#questions/8162782
+        // ----info : console.log("var_return :")
+        // ----info : console.log(var_return)
+        //  return (var_return) // // di ganti, FIX securityID https://www.udemy.com/course/loopback-4-the-complete-developers-guide/learn/lecture/15865448#questions/8162782
+
+
+
+
+        //FIX securityID https://www.udemy.com/course/loopback-4-the-complete-developers-guide/learn/lecture/15865448#questions/8162782
+        const userProfile: UserProfile = {
+            [securityId]: `${user.id}`,
+            name: userName,
+        };
+        return userProfile;
+        //FIX securityID https://www.udemy.com/course/loopback-4-the-complete-developers-guide/learn/lecture/15865448#questions/8162782
+
+        // ----info : lanjut ke user.controller
 
 
     }
