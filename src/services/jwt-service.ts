@@ -8,6 +8,7 @@ import {HttpErrors} from '@loopback/rest';
 //import {UserProfile} from '@loopback/security';
 import {securityId, UserProfile} from '@loopback/security'; // FIX securityID //https://www.udemy.com/course/loopback-4-the-complete-developers-guide/learn/lecture/15865448#questions/8162782
 import {promisify} from 'util'; // util == utility    , untuk convert callback to promise
+import {TokenServiceBindings} from '../keys';
 
 
 const jwt = require('jsonwebtoken');
@@ -17,9 +18,11 @@ export class JWTService {
 
 
     //-------------------- JWT SECRETKEY & EXPIRESIN CONSTANT VALUE
-    @inject('authentication.jwt.secret')
+    //@inject('authentication.jwt.secret')
+    @inject(TokenServiceBindings.TOKEN_SECRET)
     public readonly jwtSecret: string;
-    @inject('authentication.jwt.expiresin')
+    //@inject('authentication.jwt.expiresin')
+    @inject(TokenServiceBindings.TOKEN_EXPIRES_IN)
     public readonly jwtExpiresIn: string;
     //-------------------- /JWT SECRETKEY & EXPIRESIN CONSTANT VALUE
 

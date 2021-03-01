@@ -1,5 +1,6 @@
 import {inject} from '@loopback/core';
 import {compare, genSalt, hash} from 'bcryptjs';
+import {PasswordHashserBindings} from '../keys';
 
 export interface PasswordHasher<T = string> {
     //interface PasswordHasher<T = string> {
@@ -29,7 +30,8 @@ export class BcryptHasher implements PasswordHasher<string> {
 
 
     // --- tambahan dari application.ts
-    @inject('rounds')
+    //@inject('rounds')
+    @inject(PasswordHashserBindings.ROUNDS)
     public readonly rounds: number;
 
 

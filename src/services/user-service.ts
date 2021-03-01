@@ -4,6 +4,7 @@ import {repository} from '@loopback/repository';
 import {HttpErrors} from '@loopback/rest';
 //import { UserProfile } from '@loopback/security';
 import {securityId, UserProfile} from '@loopback/security'; // FIX SecurityID https://www.udemy.com/course/loopback-4-the-complete-developers-guide/learn/lecture/15865448#questions/8162782
+import {PasswordHashserBindings} from '../keys';
 import {User} from '../models';
 import {Credentials, UserRepository} from '../repositories/user.repository';
 import {BcryptHasher} from './hash.password.bcrypt';
@@ -17,8 +18,9 @@ export class MyUserService implements UserService<User, Credentials>{
         //---- setelah membuat func pada hash.password
         //ctrl+p @inject   pilih yg  '@loopback/core'
         // 'service.hasher' berasal dari application.ts
-        @inject('service.hasher')
-        public hasher: BcryptHasher
+        //@inject('service.hasher')
+        @inject(PasswordHashserBindings.PASSWORD_HASHSER)
+        public hasher: BcryptHasher,
         //---- /setelah membuat func pada hash.password
 
     ) { }
@@ -102,7 +104,7 @@ export class MyUserService implements UserService<User, Credentials>{
 
         //FIX securityID https://www.udemy.com/course/loopback-4-the-complete-developers-guide/learn/lecture/15865448#questions/8162782
 
-        // mirip contoh :
+        // mirip contoh : https://github.com/strongloop/loopback4-example-shopping/tree/master/packages/shopping/src/services
         const userProfile: UserProfile = {
             id: user.id,
             name: userName,

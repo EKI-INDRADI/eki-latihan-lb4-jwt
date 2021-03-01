@@ -4,6 +4,7 @@ import {inject} from "@loopback/core";
 import {repository} from "@loopback/repository";
 import {getJsonSchemaRef, post, requestBody} from "@loopback/rest";
 import * as _ from 'lodash';
+import {PasswordHashserBindings, TokenServiceBindings, UserServiceBindings} from '../keys';
 import {User} from "../models";
 import {Credentials, UserRepository} from "../repositories";
 import {BcryptHasher} from "../services/hash.password.bcrypt";
@@ -18,11 +19,14 @@ export class UserController {
   constructor(
     @repository(UserRepository)
     public UserRepository: UserRepository,
-    @inject('services.hasher')
+    // @inject('service.hasher')
+    @inject(PasswordHashserBindings.PASSWORD_HASHSER)
     public hasher: BcryptHasher,
-    @inject('services.user.service')
+    //@inject('services.user.service')
+    @inject(UserServiceBindings.USER_SERVICE)
     public userService: MyUserService,
-    @inject('services.jwt.service')
+    // @inject('services.jwt.service')
+    @inject(TokenServiceBindings.TOKEN_SERVICE)
     public jwtService: JWTService,
   ) { }
 
@@ -52,18 +56,40 @@ export class UserController {
   //  Resolver error at paths./signup.post.responses.200.content.schema.$ref
   //  Could not resolve reference: Could not resolve pointer: /definitions/User does not exist in document
 
+  // schema: getJsonSchemaRef(User).$ref,
 
+
+  //----------------- REFIXED SOLVED EKI
   @post('/users/signup', {
     responses: {
       '200': {
         description: 'User',
         content: {
-          schema: getJsonSchemaRef(User).$ref,
+          schema: getJsonSchemaRef(User),
+          $ref: getJsonSchemaRef(User).$ref
         }
       }
     }
 
   })
+  //----------------- /REFIXED SOLVED EKI
+
+  //------------------- FIX BUG  Could not render n, see the console.
+  // @post('/users/signup', {
+  //   responses: {
+  //     '200': {
+  //       description: 'User',
+  //       content: {
+  //         'aplication/json': {
+  //           schema: getJsonSchemaRef(User).$ref,
+  //         }
+  //       }
+  //     }
+  //   }
+
+  // })
+  //------------------- FIX BUG  Could not render n, see the console.
+
   //-------------- FIX BUG SWEGGER
 
   async signup(@requestBody() userData: User) {
