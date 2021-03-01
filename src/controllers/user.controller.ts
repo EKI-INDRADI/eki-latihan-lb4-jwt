@@ -56,7 +56,7 @@ export class UserController {
   //  Resolver error at paths./signup.post.responses.200.content.schema.$ref
   //  Could not resolve reference: Could not resolve pointer: /definitions/User does not exist in document
 
-  // schema: getJsonSchemaRef(User).$ref,    <<<!---- kalo pake ini doang masalah
+  // schema: getJsonSchemaRef(User).$ref,    <<<!----  kalo pake ini doang masalah
 
 
   //----------------- REFIXED SOLVED EKI
