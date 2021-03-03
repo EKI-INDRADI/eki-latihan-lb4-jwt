@@ -13,6 +13,9 @@ import {TokenServiceBindings} from '../keys';
 
 const jwt = require('jsonwebtoken');
 const signAsync = promisify(jwt.sign);
+// new update
+//const verifyAsync = promisify(jwt.verifyAsync)
+const verifyAsync = promisify(jwt.verify)
 
 export class JWTService {
 
@@ -73,8 +76,49 @@ export class JWTService {
         //https://www.udemy.com/course/loopback-4-the-complete-developers-guide/learn/lecture/15865448#questions/8162782
 
         //PROBLEM SOLVED LOOPBACK4 NEW VERSION :
-        const userProfile: UserProfile = {[securityId]: '1', name: 'Eki'};
-        return Promise.resolve(userProfile);
+        // const userProfile: UserProfile = {[securityId]: '1', id: '1', name: 'Eki'};
+        // return Promise.resolve(userProfile);
+
+
+        // new update
+        if (!token) {
+            throw new HttpErrors.Unauthorized(
+                `Error verifiying token : 'token' is null`,
+            )
+        }
+
+        let userProfile: UserProfile;
+
+
+
+        try {
+            //decode user profile from token
+            const decryptedToken = await verifyAsync(token, this.jwtSecret);
+            // don't copy over token field 'iat; and 'exp', or 'email' to user profile
+
+            // old LB4
+            // userProfile = Object.assign(
+            //     {id: '', name: ''},
+            //     {id: decryptedToken.id, name: decryptedToken.name},
+            // );
+
+            // new LB4
+            userProfile = Object.assign(
+                {id: '', name: '', [securityId]: ''},
+                {id: decryptedToken.id, name: decryptedToken.name, [securityId]: decryptedToken.id},
+            );
+        } catch (error) {
+            throw new HttpErrors.Unauthorized(
+                `Error verfying token : ${error.message}`,
+            )
+        }
+
+        return userProfile;
+
+
+
+
+
 
 
     }

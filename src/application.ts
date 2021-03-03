@@ -1,3 +1,4 @@
+import {AuthenticationComponent, registerAuthenticationStrategy} from '@loopback/authentication';
 import {BootMixin} from '@loopback/boot';
 import {ApplicationConfig} from '@loopback/core';
 import {RepositoryMixin} from '@loopback/repository';
@@ -8,6 +9,7 @@ import {
 } from '@loopback/rest-explorer';
 import {ServiceMixin} from '@loopback/service-proxy';
 import path from 'path';
+import {JWTStrategy} from './authentication-strategies/jwt-strategy';
 import {PasswordHashserBindings, TokenServiceBindings, TokenServiceConstants, UserServiceBindings} from './keys';
 import {MySequence} from './sequence';
 import {BcryptHasher} from './services/hash.password.bcrypt';
@@ -31,6 +33,15 @@ export class Rnd1Application extends BootMixin(
 
 
     //=========================================================
+
+    //=================== JWT AUTH
+    this.component(AuthenticationComponent);
+    registerAuthenticationStrategy(this, JWTStrategy);
+    //=================== /JWT AUTH
+
+
+
+
 
     // Set up the custom sequence
     this.sequence(MySequence);
