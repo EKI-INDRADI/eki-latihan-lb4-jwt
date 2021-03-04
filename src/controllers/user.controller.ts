@@ -1,11 +1,11 @@
 // Uncomment these imports to begin using these cool features!
 
-import {authenticate} from '@loopback/authentication';
+import {authenticate, AuthenticationBindings} from '@loopback/authentication';
 import {inject} from "@loopback/core";
 import {repository} from "@loopback/repository";
 import {get, getJsonSchemaRef, post, requestBody} from "@loopback/rest";
 // import  * as UCS from "./specs/user.controller.spec";
-import {securityId, UserProfile} from '@loopback/security';
+import {UserProfile} from '@loopback/security';
 import * as _ from 'lodash';
 import {PasswordHashserBindings, TokenServiceBindings, UserServiceBindings} from '../keys';
 import {User} from "../models";
@@ -166,13 +166,25 @@ export class UserController {
   // async me() : Promise<UserProfile> {
   //   return Promise.resolve({id: '1', name: 'Eki'})
   // }
+  // @get('/users/me')
+  // @authenticate('jwt')
+  // async me(): Promise<UserProfile> {
+  //   //return Promise.resolve({id: '1', name: 'Eki'})  <!--- ERROR
+  //   // return Promise.resolve({[securityId]: '1', name: 'Eki'}) <!---  OK
+
+  //   return Promise.resolve({id: '1', name: 'Eki', [securityId]: '1'})  //<!---BUG FIX
+  // }
+
+
+
   @get('/users/me')
   @authenticate('jwt')
-  async me(): Promise<UserProfile> {
-    //return Promise.resolve({id: '1', name: 'Eki'})  <!--- ERROR
-    // return Promise.resolve({[securityId]: '1', name: 'Eki'}) <!---  OK
-
-    return Promise.resolve({id: '1', name: 'Eki', [securityId]: '1'})  //<!---BUG FIX
+  async me(
+    @inject(AuthenticationBindings.CURRENT_USER)
+    currentUser: UserProfile,
+  ): Promise<UserProfile> {
+    // console.log(currentUser)
+    return Promise.resolve(currentUser)
   }
 
   //---------------- /Creating JWT Authentication Strategy
