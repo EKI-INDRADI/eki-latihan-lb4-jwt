@@ -1,6 +1,11 @@
-# rnd1
-
+# PROJECT
 EKI INDRADI LOOPBACK4 JWT (JSON WEB TOKEN) AUTHENTICATION
+
+INSTRUCTOR : Haider Malik (Udemy)
+
+UDEMY : https://www.udemy.com/course/loopback-4-the-complete-developers-guide/
+
+
 
 This application is generated using [LoopBack 4 CLI](https://loopback.io/doc/en/lb4/Command-line-interface.html) with the
 [initial project layout](https://loopback.io/doc/en/lb4/Loopback-application-layout.html).
@@ -63,6 +68,13 @@ npm run lint:fix
 - `npm run docker:build`: Build a Docker image for this application
 - `npm run docker:run`: Run this application inside a Docker container
 
+## EKI NOTE
+
+- `npm run migrate`: perintah ini akan create schema atau menambahkan column (replace) secara otomatis
+
+namun untuk auto increment pada id silahkan edit manual
+
+
 ## Tests
 
 ```sh
@@ -77,11 +89,16 @@ understand how you can continue to add features to this application.
 [![LoopBack](https://github.com/strongloop/loopback-next/raw/master/docs/site/imgs/branding/Powered-by-LoopBack-Badge-(blue)-@2x.png)](http://loopback.io/)
 
 
-## tambahan bcrypt
+## JWT Bcrypt Hash
 ```ts
 const context = {
     config : [],
     'service.hasher' : BcryptHasher,
     'round' : 10
 }
+```
+
+## Role Base Authentication
+```
+Admin Role : Only admin can, create, update, and delete job
 ```

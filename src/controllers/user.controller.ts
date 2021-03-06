@@ -7,6 +7,7 @@ import {get, getJsonSchemaRef, post, requestBody} from "@loopback/rest";
 // import  * as UCS from "./specs/user.controller.spec";
 import {UserProfile} from '@loopback/security';
 import * as _ from 'lodash';
+import {PermissionKeys} from '../authorization/permission-keys';
 import {PasswordHashserBindings, TokenServiceBindings, UserServiceBindings} from '../keys';
 import {User} from "../models";
 import {Credentials, UserRepository} from "../repositories";
@@ -98,6 +99,12 @@ export class UserController {
     // encrypt the user password
     // eslint-disable-next-line require-atomic-updates
     userData.password = await this.hasher.hashPassword(userData.password);
+
+
+    //---- authorization premission-keys
+    userData.permissions = [PermissionKeys.AcessAuthFeature];
+    //---- authorization premission-keys
+
 
     // savedUser : any   << eki edit
     const savedUser: any = await this.UserRepository.create(userData);

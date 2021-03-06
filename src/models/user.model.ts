@@ -1,6 +1,6 @@
 import {Entity, model, property} from '@loopback/repository';
 
- @model()
+@model()
 
 // @model({
 //   settings: {
@@ -42,7 +42,12 @@ export class User extends Entity {
   })
   lastName: string;
 
-
+  //---------------------- Create admin role
+  @property.array(String)
+  permissions: String[];
+  // pastikan pada tabel sudah ada column permissions
+  // jika tidak ada maka loopback akan create columnn permission secara otomatis
+  //---------------------- /Create admin role
   constructor(data?: Partial<User>) {
     super(data);
   }
