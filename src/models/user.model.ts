@@ -42,12 +42,17 @@ export class User extends Entity {
   })
   lastName: string;
 
+
   //---------------------- Create admin role
   @property.array(String)
   permissions: String[];
   // pastikan pada tabel sudah ada column permissions
+  // atau
   // jika tidak ada maka loopback akan create columnn permission secara otomatis
+  // npm run build
+  // npm run migrate
   //---------------------- /Create admin role
+
   constructor(data?: Partial<User>) {
     super(data);
   }
