@@ -102,7 +102,7 @@ export class UserController {
 
 
     //---- authorization premission-keys
-    userData.permissions = [PermissionKeys.AcessAuthFeature];
+    userData.permissions = [PermissionKeys.AccessAuthFeature];
     //---- authorization premission-keys
 
 

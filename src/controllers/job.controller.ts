@@ -1,3 +1,4 @@
+import {authenticate} from '@loopback/authentication';
 import {
   Count,
   CountSchema,
@@ -9,18 +10,13 @@ import {
 import {
   del, get,
   getModelSchemaRef, param,
-
-
   patch, post,
-
-
-
-
   put,
-
   requestBody,
   response
 } from '@loopback/rest';
+import {PermissionKeys} from '../authorization/permission-keys';
+//import {PermissionKeys} from '../authorization/permission-keys'; << karena tidak membutuhkan required
 import {Job} from '../models';
 import {JobRepository} from '../repositories';
 
@@ -39,6 +35,14 @@ export class JobController {
     description: 'Job model instance',
     content: {'application/json': {schema: getModelSchemaRef(Job)}},
   })
+
+  // @authenticate('jwt')   // SOLVED
+  // atau
+  // https://www.udemy.com/course/loopback-4-the-complete-developers-guide/learn/lecture/15887918#questions/13424256
+  @authenticate({strategy: 'jwt', options: {required: [PermissionKeys.CreateJob]}})  // SOLVED
+  // https://loopback.io/doc/en/lb4/apidocs.authentication.authenticationmetadata.html
+  // @authenticate('jwt', {required : [PermissionKeys.CreateJob]}) // BUG
+  // loopback4 terbaru tidak membutuhkan required
   async create(
     @requestBody({
       content: {

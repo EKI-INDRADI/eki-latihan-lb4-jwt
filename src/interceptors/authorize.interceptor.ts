@@ -1,5 +1,7 @@
+import {AuthenticationBindings, AuthenticationMetadata} from '@loopback/authentication';
 import {
   globalInterceptor,
+  inject,
   Interceptor,
   InvocationContext,
   InvocationResult,
@@ -16,6 +18,16 @@ export class AuthorizeInterceptor implements Provider<Interceptor> {
   /*
   constructor() {}
   */
+  constructor(
+    @inject(AuthenticationBindings.METADATA)
+    //injectnya pake lib loopback/core
+    public metadata: AuthenticationMetadata
+  ) { }
+
+
+
+
+
 
   /**
    * This method is used by LoopBack context to produce an interceptor function
@@ -39,6 +51,7 @@ export class AuthorizeInterceptor implements Provider<Interceptor> {
     try {
       // Add pre-invocation logic here
       console.log('Log from authorize global interceptor')
+      console.log(this.metadata);
       const result = await next();
       // Add post-invocation logic here
       return result;
