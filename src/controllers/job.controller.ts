@@ -43,6 +43,7 @@ export class JobController {
   // https://loopback.io/doc/en/lb4/apidocs.authentication.authenticationmetadata.html
   // @authenticate('jwt', {required : [PermissionKeys.CreateJob]}) // BUG
   // loopback4 terbaru tidak membutuhkan required
+  // @authenticate({strategy: 'jwt', options: {required: [PermissionKeys.CreateJob]}} <<<< fungsi ini lebih spesifik
   async create(
     @requestBody({
       content: {

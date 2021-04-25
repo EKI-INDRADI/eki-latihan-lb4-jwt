@@ -8,6 +8,7 @@ import {
   Provider,
   ValueOrPromise
 } from '@loopback/core';
+import {RequiredPermissions} from '../types';
 
 /**
  * This class will be bound to the application as an `Interceptor` during
@@ -52,7 +53,23 @@ export class AuthorizeInterceptor implements Provider<Interceptor> {
       // Add pre-invocation logic here
       console.log('Log from authorize global interceptor')
       console.log(this.metadata);
+
+      // ----25-04-2021
+      // if you will not  provide options in your @authenticate decorator
+      // this line will be executed
+      if (!this.metadata) return await next();
+      // ----25-04-2021
+
+
       const result = await next();
+
+      // ----25-04-2021
+      const requiredPermissions = this.metadata.options as RequiredPermissions
+      // RequiredPermissions dari src/types.ts
+
+      console.log(requiredPermissions)
+      // ----25-04-2021
+
       // Add post-invocation logic here
       return result;
     } catch (err) {
