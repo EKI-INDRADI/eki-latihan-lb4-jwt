@@ -2,7 +2,7 @@
 // hasil copy dari src\controllers\user.controller.ts
 import {inject} from '@loopback/core';
 import {repository} from '@loopback/repository';
-import {getJsonSchemaRef, post, requestBody} from '@loopback/rest';
+import {post, requestBody} from '@loopback/rest';
 import * as _ from 'lodash';
 import {PermissionKeys} from '../authorization/permission-keys';
 import {PasswordHashserBindings} from '../keys';
@@ -44,8 +44,20 @@ export class AdminController {
       '200': {
         description: 'Admin',
         content: {
-          schema: getJsonSchemaRef(User),
-          $ref: getJsonSchemaRef(User).$ref
+          // 29-04-2021 BUG FIX bug dari sweggernya sama kaya user
+          // schema: getJsonSchemaRef(User)
+          // $ref: getJsonSchemaRef(User).$ref
+
+          // Error
+          // Resolver error at paths./admin.post.responses.200.content.schema.$ref
+          // Could not resolve reference: Could not resolve pointer: /definitions/User does not exist in document
+          // Resolver error at paths./admin.post.responses.200.content.$ref
+          // Could not resolve reference: Could not resolve pointer: /definitions/User does not exist in document
+
+          // Note : jadi di skip aja  untuk schema nya gak guna juga
+
+          // 29-04-2021
+
         }
       }
     }

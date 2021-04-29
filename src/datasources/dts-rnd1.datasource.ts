@@ -4,8 +4,8 @@ import {juggler} from '@loopback/repository';
 const config = {
   name: 'dts_rnd1',
   connector: 'mysql',
-  url: 'mysql://root:masuk123@192.168.100.6/rnd1',
-  host: '192.168.100.6',
+  url: 'mysql://root:masuk123@192.168.100.4/rnd1',
+  host: '192.168.100.4',
   port: 3306,
   user: 'root',
   password: 'masuk123',

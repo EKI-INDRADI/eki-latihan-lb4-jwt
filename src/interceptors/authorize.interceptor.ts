@@ -1,5 +1,6 @@
 import {AuthenticationBindings, AuthenticationMetadata} from '@loopback/authentication';
 import {
+  Getter,
   globalInterceptor,
   inject,
   Interceptor,
@@ -8,7 +9,7 @@ import {
   Provider,
   ValueOrPromise
 } from '@loopback/core';
-import {RequiredPermissions} from '../types';
+import {MyUserProfile, RequiredPermissions} from '../types';
 
 /**
  * This class will be bound to the application as an `Interceptor` during
@@ -22,7 +23,14 @@ export class AuthorizeInterceptor implements Provider<Interceptor> {
   constructor(
     @inject(AuthenticationBindings.METADATA)
     //injectnya pake lib loopback/core
-    public metadata: AuthenticationMetadata
+    //public metadata: AuthenticationMetadata
+    // ----29-04-2021
+    public metadata: AuthenticationMetadata,
+    @inject.getter(AuthenticationBindings.CURRENT_USER)
+    public getCurrentUser: Getter<MyUserProfile>,
+    // ----29-04-2021
+
+
   ) { }
 
 
@@ -69,6 +77,13 @@ export class AuthorizeInterceptor implements Provider<Interceptor> {
 
       console.log(requiredPermissions)
       // ----25-04-2021
+
+      // ----29-04-2021
+      // check user permission
+      // console.log(requiredPermissions)
+      const user = await this.getCurrentUser()
+      console.log('User Permissions: ', user.permissions);
+      // ----29-04-2021
 
       // Add post-invocation logic here
       return result;

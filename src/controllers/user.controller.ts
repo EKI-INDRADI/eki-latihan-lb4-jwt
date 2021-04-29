@@ -3,7 +3,7 @@
 import {authenticate, AuthenticationBindings} from '@loopback/authentication';
 import {inject} from "@loopback/core";
 import {repository} from "@loopback/repository";
-import {get, getJsonSchemaRef, post, requestBody} from "@loopback/rest";
+import {get, post, requestBody} from "@loopback/rest";
 // import  * as UCS from "./specs/user.controller.spec";
 import {UserProfile} from '@loopback/security';
 import * as _ from 'lodash';
@@ -61,19 +61,45 @@ export class UserController {
   // schema: getJsonSchemaRef(User).$ref,    <<<!----  kalo pake ini doang masalah
 
 
-  //----------------- REFIXED SOLVED EKI
+  // 29-04-2021 ----------------- REFIXED 2 SOLVED EKI
   @post('/users/signup', {
     responses: {
       '200': {
         description: 'User',
         content: {
-          schema: getJsonSchemaRef(User),
-          $ref: getJsonSchemaRef(User).$ref
+          // schema: getJsonSchemaRef(User),
+          // $ref: getJsonSchemaRef(User).$ref
+
+          // Error
+          // Resolver error at paths./users/signup.post.responses.200.content.schema.$ref
+          // Could not resolve reference: Could not resolve pointer: /definitions/User does not exist in document
+          // Resolver error at paths./users/signup.post.responses.200.content.$ref
+          // Could not resolve reference: Could not resolve pointer: /definitions/User does not exist in document
+
+          // Note : BUG FIX bug dari sweggernya , jadi di skip aja  untuk schema nya gak guna juga kalo di POST signup
+
         }
       }
     }
 
   })
+  // 29-04-2021 ----------------- /REFIXED 2 SOLVED EKI
+
+
+
+  //----------------- REFIXED SOLVED EKI
+  // @post('/users/signup', {
+  //   responses: {
+  //     '200': {
+  //       description: 'User',
+  //       content: {
+  //         schema: getJsonSchemaRef(User),
+  //         $ref: getJsonSchemaRef(User).$ref
+  //       }
+  //     }
+  //   }
+
+  // })
   //----------------- /REFIXED SOLVED EKI
 
   //------------------- FIX BUG  Could not render n, see the console.
