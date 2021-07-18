@@ -1,0 +1,175 @@
+lb4 app
+lb4 datasource
+lb4 model
+lb4 repository
+lb4 controller
+npm start
+
+
+----------
+lb4 datasource
+? Datasource name: dts_rnd1
+? Select the connector for dts_rnd1:  MySQL (supported by StrongLoop)
+? Connection String url to override other settings (eg: mysql://user:pass@host/db): 
+? host: 192.168.1.105
+? port: 3306
+? user: root
+? password: [hidden]
+? database: rnd1
+----
+
+
+table : User
+id int(11) Primary AI 
+email varchar(255)
+password varchar(255)		
+fristName varchar(255)
+lastName varchar(255)
+ALTER TABLE `User` ADD UNIQUE( `email`);
+
+
+
+
+table : tbl_data
+id int(11) Primary AI 
+data1 varchar(255)	
+data2 varchar(255)
+createdat date	 current_timestamp
+
+
+--
+
+lb4 model
+? Model class name: User
+? Please select the model base class Entity (A persisted model with an ID)
+? Allow additional (free-form) properties? No
+
+? Enter the property name: id
+? Property type: number
+? Is id the ID property? Yes
+? Is id generated automatically? Yes
+
+? Enter the property name: email
+? Property type: string  
+? Is it required?: Yes
+
+? Enter the property name: password
+? Property type: string  
+? Is it required?: Yes
+
+? Enter the property name: firstName
+? Property type: string  
+? Is it required?: Yes
+
+? Enter the property name: lastName
+? Property type: string
+? Is it required?: Yes
+
+
+--
+
+lb4 repository
+? Please select the datasource DtsRnd1Datasource
+? Select the model(s) you want to generate a repository for User
+? Please select the repository base class DefaultCrudRepository (Juggler bridge)
+
+--
+
+lb4 controller User
+? What kind of controller would you like to generate? Empty Controller
+
+
+
+
+
+
+CTRL+P
+user.controller.ts (jwt 0  migrate.ts)   untuk ngeditnya pake ctrl+space  enter biar auto import
+migrate.ts (jwt 0 user.controller.ts) untuk ngeditnya pake ctrl+space  enter biar auto import
+
+
+
+
+
+--
+
+lb4 model tbl_data
+>>> Underscores _ in the class name will get removed: tbl_data
+? Please select the model base class Entity (A persisted model with an ID)
+? Allow additional (free-form) properties? (y/N) n
+? Allow additional (free-form) properties? No
+
+? Enter the property name: id
+? Property type: number        
+? Is id the ID property? Yes
+? Is id generated automatically? Yes  
+
+? Enter the property name: data1 
+? Property type: string  
+? Is it required?: Yes
+
+? Enter the property name: data2 
+? Property type: string  
+? Is it required?: Yes
+
+? Enter the property name: createdat
+? Property type: date    
+? Is it required?: No
+? Default value [leave blank for none]: 
+
+lb4 repository
+? Please select the datasource DtsRnd1Datasource
+? Select the model(s) you want to generate a repository for TblData
+? Please select the repository base class DefaultCrudRepository (Juggler bridge)
+
+lb4 controller tbl_data
+>>> Underscores _ in the class name will get removed: tbl_data
+
+? What kind of controller would you like to generate? REST Controller with CRUD functions
+? What is the name of the model to use with this CRUD repository? (Use arrow keys)
+? What is the name of the model to use with this CRUD repository? TblData
+? What is the name of your CRUD repository? TblDataRepository
+? What is the name of ID property? id
+? What is the type of your ID? number
+? Is the id omitted when creating a new instance? Yes
+? What is the base HTTP path name of the CRUD operations? /tbl-data
+
+
+--
+
+
+npm run migrate
+       npm run build   -- not use run build udah auto run migrate
+npm run start
+
+
+
+http://localhost:3000/explorer/#/UserController/UserController.signup
+
+{
+ 
+  "email": "admin@mail.com",
+  "password": "masuk123",
+  "firstName": "admin",
+  "lastName": "mail"
+}
+
+
+-------------- menjegah apabila email sama ketika insert lagi
+ALTER TABLE `User` ADD UNIQUE( `email`);
+
+
+
+
+{
+ 
+  "email": "admin@mail.com",
+  "password": "masuk123",
+  "firstName": "admin",
+  "lastName": "mail"
+}
+
+
+
+akan error jiak email sama
+-------------- / menjegah apabila email sama ketika insert lagi

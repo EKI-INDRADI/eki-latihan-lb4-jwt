@@ -1,0 +1,614 @@
+37. Verify User Credentials while Login
+
+npm install @loopback/authentication
+
+
+buatlah user-service pada folder services
+src\services\user-service.ts
+
+-----
+import { UserService } from '@loopback/authentication' ;
+import { UserProfile } from '@loopback/security';
+import { User } from '../models';
+import { Credentials } from '../repositories/user.repository';
+
+export class MyUserService implements UserService<User, Credentials>{
+
+    
+}
+-----
+
+
+
+
+
+pada  MyUserService  kelik quick fix
+-----
+export class MyUserService implements UserService<User, Credentials>{
+    verifyCredentials(credentials: Credentials): Promise<User> {
+        throw new Error('Method not implemented.');
+    }
+    convertToUserProfile(user: User): UserProfile {
+        throw new Error('Method not implemented.');
+    }
+}
+-----
+
+
+ubah
+
+--
+
+
+export class MyUserService implements UserService<User, Credentials>{
+    verifyCredentials(credentials: Credentials): Promise<User> {
+        throw new Error('Method not implemented.');
+    }
+    convertToUserProfile(
+        user: User
+    ): UserProfile {
+        // gak perlu import loopback/authentication karena user profilenya juga ngikutin saat quick fix
+        throw new Error('Method not implemented.');
+    }
+
+    
+}
+
+--
+
+
+pada
+\src\controllers\user.controller.ts
+sebeumnya
+-----
+export class UserController {
+  constructor(
+    @repository(UserRepository)
+   public UserRepository: UserRepository,
+   @inject('service.hasher')
+   public hasher: BcryptHasher
+  ) {}
+-----
+
+
+ubah jadi
+
+-----
+import { CredentialsRequestBody } from "./specs/user.controller.spec";
+import { MyUserService } from "../services/user-service";
+// import  * as UCS from "./specs/user.controller.spec";
+
+
+export class UserController {
+  constructor(
+    @repository(UserRepository)
+   public UserRepository: UserRepository,
+   @inject('service.hasher')
+   public hasher: BcryptHasher,
+   @inject('services.user.service')
+   public userService : MyUserService
+  ) {}
+
+-----
+
+
+
+CTRL+P
+apllication.ts
+
+\src\application.ts
+tambahkan
+
+yang di dalam komentar "tambahan user.controller.spec -> user-service -> user controller  -> application ts"
+-----
+
+    setupBinding() : void {
+      this.bind('service.hasher').toClass(BcryptHasher);
+
+      // ctrl+space BcryptHasher enter (biar ke import)
+
+      //--------------------------- tambahan
+        this.bind('rounds').to(10);
+      //--------------------------- /tambahan
+
+      //--------------------------- tambahan user.controller.spec -> user-service -> user controller  -> application ts
+        this.bind('services.user.service').toClass(MyUserService)
+      //--------------------------- /tambahan user.controller.spec -> user-service -> user controller  -> application ts
+    }   
+
+-----
+
+
+
+
+\src\application.ts
+tambahkan
+
+yang di dalam komentar "tambahan user.controller.spec -> user-service -> user controller  -> application ts -> await user controller"
+-----
+    async login(
+      @requestBody(CredentialsRequestBody) credentials: Credentials,
+    ): Promise<{token: string}> {
+
+            //--------------------------- tambahan user.controller.spec -> user-service -> user controller  -> application ts -> await user controller
+          await this.userService.verifyCredentials(credentials);
+            //--------------------------- /tambahan user.controller.spec -> user-service -> user controller  -> application ts -> await user controller
+    return Promise.resolve({token : '12312311adadasdasda'})
+  }
+-----
+
+
+
+
+
+akan error 
+Request POST /users/login failed with status code 500. Error: Method not implemented.
+
+
+
+solusinya :
+pada
+src\services\user-service.ts
+
+sblmnya
+-----
+
+export class MyUserService implements UserService<User, Credentials>{
+
+    verifyCredentials(credentials: Credentials): Promise<User> {
+        throw new Error('Method not implemented.');
+    }
+    convertToUserProfile(
+        user: User
+    ): UserProfile {
+        // gak perlu import loopback/authentication kare user profilenya juga ngikutin saat quick fix
+        throw new Error('Method not implemented.');
+    }
+
+    
+}
+-----
+
+
+
+pada
+src\services\user-service.ts
+
+tambahkan
+
+-----
+import { UserService } from '@loopback/authentication' ;
+import { UserProfile } from '@loopback/security';
+import { User } from '../models';
+import { Credentials, UserRepository } from '../repositories/user.repository';
+import { repository } from '@loopback/repository';
+
+
+export class MyUserService implements UserService<User, Credentials>{
+    constructor(
+        @repository(UserRepository)
+        public userRepository: UserRepository,
+    ) { }
+
+
+verifyCredentials(credentials: Credentials): Promise<User> {
+        // throw new Error('Method not implemented.');
+
+        // Promise akan error abaikan dlu
+        const foundUser = await this.userRepository.findOne({
+            // await akan eror abaikan dlu
+
+            // agar tidak error perlu tambahkan func di hash.password.bcrypt.ts
+            where: {
+                email: credentials.email
+            }
+        });
+
+        if (!foundUser) {
+            throw new HttpErrors.NotFound(`user not found with this ${credentials.email}`);
+        }
+
+
+    }
+
+
+
+    convertToUserProfile(
+        user: User
+    ): UserProfile {
+        // gak perlu import loopback/authentication kare user profilenya juga ngikutin saat quick fix
+        throw new Error('Method not implemented.');
+    }
+
+    
+}
+
+-----
+
+
+
+pada samakan semua kodingan di 
+\src\services\hash.password.bcrypt.ts
+menjadi
+
+-----
+
+import { inject } from '@loopback/core';
+import { compare, genSalt, hash } from 'bcryptjs';
+
+interface PasswordHasher<T = string> {
+    hashPassword(password: T): Promise<T>;
+    //--- agar user-service.ts tidak error
+    //comparePassword(<input password>: T, <<password database>>: T) : 
+    comparePassword(providedPass: T, storedPass: T): Promise<boolean>
+    //--- agar user-service.ts tidak error
+}
+
+
+export class BcryptHasher implements PasswordHasher<string> {
+    // class BcryptHasher   quick fix ->  PasswordHasher , maka akan membuat class comparePassword
+    // comparePassword(providedPass: string, storedPass: string): Promise<boolean> {
+
+    // rubah menjadi async
+    async comparePassword(providedPass: string, storedPass: string): Promise<boolean> {
+        //throw new Error('Method not implemented.');
+
+        const passwordMatched = await compare(providedPass, storedPass)
+        // pada ctrl +space compare enter (import compare  bcryptjs)
+
+        return passwordMatched
+    }
+
+
+
+
+    // --- tambahan dari application.ts
+    @inject('rounds')
+    public readonly rounds: number;
+
+
+    // round: number = 10;  <<=== tidak diperlukan lg
+    // --- tambahan dari application.ts
+    async hashPassword(password: string) {
+        const salt = await genSalt(this.rounds);
+        return await hash(password, salt);
+    }
+}
+
+-----
+
+
+
+
+
+
+
+
+kembali lagi pada
+src\services\user-service.ts
+
+agar user-service tidak error
+-----
+import { inject } from '@loopback/core';
+import { BcryptHasher } from './hash.password.bcrypt';
+..
+
+..
+export class MyUserService implements UserService<User, Credentials>{
+    constructor(
+        @repository(UserRepository)
+        public userRepository: UserRepository,
+
+        //---- setelah membuat func pada hash.password
+        //ctrl+p @inject   pilih yg  '@loopback/core'
+        // 'service.hasher' berasal dari application.ts
+        @inject('service.hasher')
+        public hasher: BcryptHasher
+        //---- /setelah membuat func pada hash.password
+
+    ) { }
+..
+
+
+
+
+
+
+
+..
+    // verifyCredentials(credentials: Credentials): Promise<User> {
+    async verifyCredentials(credentials: Credentials): Promise<User> {
+        // throw new Error('Method not implemented.');
+
+        // Promise akan error abaikan dlu
+        const foundUser = await this.userRepository.findOne({
+            // await akan eror abaikan dlu
+
+            // agar tidak error perlu tambahkan func di hash.password.bcrypt.ts
+            where: {
+                email: credentials.email
+            }
+        });
+
+        if (!foundUser) {
+            throw new HttpErrors.NotFound(`user not found with this ${credentials.email}`);
+        }
+
+        //---- setelah membuat func pada hash.password
+        // copy ctrl+p application.ts
+
+        //    const passwordMatched = await this.hasher.comparePassword(<password plaintext format>, <password hash format>)
+        const passwordMatched = await this.hasher.comparePassword(credentials.password, foundUser.password)
+
+
+        if (!passwordMatched) {
+            throw new HttpErrors.Unauthorized('password is not valid');
+        }
+
+
+        return foundUser;
+
+
+
+    }
+..
+
+-----
+
+
+
+
+total keseluruhan dari 
+src\services\user-service.ts
+-----
+import { UserService } from '@loopback/authentication';
+import { UserProfile } from '@loopback/security';
+import { User } from '../models';
+import { Credentials, UserRepository } from '../repositories/user.repository';
+import { repository } from '@loopback/repository';
+import { HttpErrors } from '@loopback/rest';
+import { inject } from '@loopback/core';
+import { BcryptHasher } from './hash.password.bcrypt';
+
+
+export class MyUserService implements UserService<User, Credentials>{
+    constructor(
+        @repository(UserRepository)
+        public userRepository: UserRepository,
+
+        //---- setelah membuat func pada hash.password
+        //ctrl+p @inject   pilih yg  '@loopback/core'
+        // 'service.hasher' berasal dari application.ts
+        @inject('service.hasher')
+        public hasher: BcryptHasher
+        //---- /setelah membuat func pada hash.password
+
+    ) { }
+
+
+    // verifyCredentials(credentials: Credentials): Promise<User> {
+    async verifyCredentials(credentials: Credentials): Promise<User> {
+        // throw new Error('Method not implemented.');
+
+        // Promise akan error abaikan dlu
+        const foundUser = await this.userRepository.findOne({
+            // await akan eror abaikan dlu
+
+            // agar tidak error perlu tambahkan func di hash.password.bcrypt.ts
+            where: {
+                email: credentials.email
+            }
+        });
+
+        if (!foundUser) {
+            throw new HttpErrors.NotFound(`user not found with this ${credentials.email}`);
+        }
+
+        //---- setelah membuat func pada hash.password
+        // copy ctrl+p application.ts
+
+        //    const passwordMatched = await this.hasher.comparePassword(<password plaintext format>, <password hash format>)
+        const passwordMatched = await this.hasher.comparePassword(credentials.password, foundUser.password)
+
+
+        if (!passwordMatched) {
+            throw new HttpErrors.Unauthorized('password is not valid');
+        }
+
+
+        return foundUser;
+
+
+
+    }
+    convertToUserProfile(
+        user: User
+    ): UserProfile {
+        // gak perlu import loopback/authentication kare user profilenya juga ngikutin saat quick fix
+        throw new Error('Method not implemented.');
+    }
+
+
+}
+
+-----
+
+
+
+
+
+pada
+\src\controllers\user.controller.ts
+
+ubah menjadi
+-----
+ async login(
+    @requestBody(CredentialsRequestBody) credentials: Credentials,
+  ): Promise<{ token: string }> {
+
+    //--------------------------- tambahan user.controller.spec -> user-service -> user controller  -> application ts -> await user controller
+    //  await this.userService.verifyCredentials(credentials);
+
+    // setelah selesai coding user.controller.ts ubah menjadi
+    const user = await this.userService.verifyCredentials(credentials);
+    console.log(user);
+    //--------------------------- /tambahan user.controller.spec -> user-service -> user controller  -> application ts -> await user controller
+    return Promise.resolve({ token: '12312311adadasdasda' })
+  }
+  //----------------- Creating Login Route
+-----
+
+
+
+
+
+
+
+
+
+
+
+
+
+=================== VALIDASI USER SUCESSS
+- gagal login jika user salah
+- gagal login jika password salah
+- gagal login jika password kurang dari 8
+- berhasil login jika user benar , result token
+=================== //VALIDASI USER SUCESSS
+
+
+
+37. Verify User Credentials while Login  , next 12:44
+
+
+pada
+src\services\user-service.ts
+-----
+pada video
+import { UserService, UserProfile } from '@loopback/authentication';
+
+tetapi karena looopback 4 update maka
+
+import { UserService } from '@loopback/authentication';
+import { UserProfile } from '@loopback/security';
+-----
+
+
+
+masih pada 
+src\services\user-service.ts
+
+sebelumnya
+-----
+    convertToUserProfile(
+        user: User
+    ): UserProfile {
+        // gak perlu import loopback/authentication kare user profilenya juga ngikutin saat quick fix
+
+        // import { UserService, UserProfile } from '@loopback/authentication';
+
+        // tetapi karena looopback 4 update maka
+
+        // import { UserService } from '@loopback/authentication';
+        // import { UserProfile } from '@loopback/security';
+        throw new Error('Method not implemented.');
+    }
+-----
+
+
+
+ubah menjadi
+src\services\user-service.ts
+-----
+ convertToUserProfile(
+        user: User
+    ): UserProfile {
+        // gak perlu import loopback/authentication kare user profilenya juga ngikutin saat quick fix
+        // kalo divideo
+        // import { UserService, UserProfile } from '@loopback/authentication';
+        // tetapi karena looopback 4 update maka
+        // import { UserService } from '@loopback/authentication';
+        // import { UserProfile } from '@loopback/security';
+
+        //-------------- untuk psersyaratan JWT ada id,name,email,password
+        //---- maka frist dan last di gabung
+        //   throw new Error('Method not implemented.');
+        let userName = ''
+        if (user.firstName) {
+            userName = user.firstName;
+        }
+        if (user.lastName) {
+            userName = user.firstName
+                ? `${user.firstName} ${user.lastName}`
+                : user.lastName;
+        }
+        //  return {id: user.id, name: userName} karena type number jadi error :
+        // Property '[securityId]' is missing in type '{ id: number | undefined; name: string; }' but required in type 'UserProfile'.ts(2741)
+        // maka sesuaikan tipe data dari   src\models\user.model.ts
+
+        //  return {id: `${user.id}`, name: userName} // <<<---- ERRROR
+
+        // gantinya pakai ini
+        let var_userid_string = String(user.id)
+        // var_return : any = {string, string}
+        let var_return: any = { id: var_userid_string, name: userName }
+        console.log("var_return :")
+        console.log(var_return)
+        return (var_return)
+
+        // lanjut ke user.controller
+
+
+    }
+-----
+
+
+
+
+
+
+pada user-service
+src\controllers\user.controller.ts
+tambah
+-----
+
+  async login(
+    @requestBody(CredentialsRequestBody) credentials: Credentials,
+  ): Promise<{ token: string }> {
+
+...
+    //------------- syarat JWT tambahan dari user-service.ts
+    const userProfile = this.userService.convertToUserProfile(user);
+    console.log(userProfile)
+    //------------- /syarat JWT tambahan dari user-service.ts
+...
+}
+-----
+
+
+maka mnjadi
+src\controllers\user.controller.ts
+-----
+  async login(
+    @requestBody(CredentialsRequestBody) credentials: Credentials,
+  ): Promise<{ token: string }> {
+
+    //--------------------------- tambahan user.controller.spec -> user-service -> user controller  -> application ts -> await user controller
+    //  await this.userService.verifyCredentials(credentials);
+
+    // setelah selesai coding user.controller.ts ubah menjadi
+    const user = await this.userService.verifyCredentials(credentials);
+    console.log(user);
+    //--------------------------- /tambahan user.controller.spec -> user-service -> user controller  -> application ts -> await user controller
+
+    //------------- syarat JWT tambahan dari user-service.ts
+
+    const userProfile = this.userService.convertToUserProfile(user);
+    console.log(userProfile)
+    //------------- /syarat JWT tambahan dari user-service.ts
+
+    // selanjutnya generate JSON WEB TOKEN
+    return Promise.resolve({ token: '12312311adadasdasda' })
+  }
+-----

@@ -1,0 +1,130 @@
+buat folder /src/services
+buat file /src/services/validator.ts
+
+npm install isemail @types/lodash
+
+==============================================================
+/src/repositories/user.repositor.ts
+---
+import {inject} from '@loopback/core';
+import {DefaultCrudRepository} from '@loopback/repository';
+import {DtsRnd1DataSource} from '../datasources';
+import {User, UserRelations} from '../models';
+
+export type Credentials = {
+  email : string;
+  password : string;
+}
+
+==============================================================
+/src/services/validator.ts
+---
+import { HttpErrors } from '@loopback/rest';
+import * as isEmail from 'isemail';
+import {Credentials} from '../repositories/user.repository';
+export function validateCredentials(credentials: Credentials) {
+  if (!isEmail.validate(credentials.email)){
+      throw new HttpErrors.UnprocessableEntity('invalid Email');
+  }
+
+  if(credentials.password.length < 8) {
+      throw new HttpErrors.UnprocessableEntity(
+          'password length should be grather than 8',
+      )
+  }
+}
+==============================================================
+/src/controllers/user.controller.ts
+---
+import { validateCredentials } from "../services/validator";
+
+
+
+//------------------versi ke 1
+
+{
+..
+  async signup(@requestBody() userData: User ){
+//----------- tambahkan ini untuk panggil func di services validator
+    validateCredentials(userData)
+//----------- tambahkan ini untuk panggil func di services validator
+    // savedUser : any   << eki edit
+    const savedUser : any =  await this.UserRepository.create(userData);
+    delete savedUser.password;
+    return savedUser;
+
+
+  }
+..
+}
+
+//------------------/versi ke 1
+
+
+//------------------versi ke 2
+/src/controllers/user.controller.ts
+---
+import { validateCredentials } from "../services/validator";
+import * as _ from 'lodash';
+{
+..
+  async signup(@requestBody() userData: User ){
+//----------- tambahkan ini untuk panggil func di services validator
+    validateCredentials(_.pick(userData, ['email','password']))
+//----------- tambahkan ini untuk panggil func di services validator
+    // savedUser : any   << eki edit
+    const savedUser : any =  await this.UserRepository.create(userData);
+    delete savedUser.password;
+    return savedUser;
+
+
+  }
+
+..
+}
+
+//------------------/ versi ke 2
+
+
+
+
+
+
+
+
+
+
+
+jika data di input asal asalan maka akan error
+
+
+{
+  "error": {
+    "statusCode": 422,
+    "name": "UnprocessableEntityError",
+    "message": "invalid Email"
+  }
+}
+
+
+jika  kurang dr 8 karakter
+
+
+
+{
+
+"email": "asdasdas@mail.com",
+  "password": "sasa",
+  "firstName": "st231",
+  "lastName": "st1231"
+}
+
+maka
+
+{
+  "error": {
+    "statusCode": 422,
+    "name": "UnprocessableEntityError",
+    "message": "password length should be grather than 8"
+  }
+}

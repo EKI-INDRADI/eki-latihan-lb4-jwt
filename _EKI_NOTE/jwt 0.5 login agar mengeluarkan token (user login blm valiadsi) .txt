@@ -1,0 +1,172 @@
+36. Creating Login Route
+
+
+===========  AGAR DAPAT MENGELUARKAN TOKEN  (USER LOGIN BLM DI VALIDASI)
+src\controllers\user.controller.ts
+----------
+pada baris paling bawah sebelum }
+  //----------------- Creating Login Route
+  @post('/users/login')
+  async login(@requestBody() credentials : Credentials): Promise<{token: string}>{
+    return Promise.resolve({token : '12312311adadasdasda'})
+  }
+  //----------------- Creating Login Route
+
+----------
+
+
+
+
+pada src\controllers\user.controller.ts
+
+ubah
+----------
+@post('/signup', {
+    responses: {
+      '200': {
+        description: 'User',
+        content: {
+          schema: getJsonSchemaRef(User).$ref,
+----------
+
+
+menjadi
+----------
+  @post('/users/signup', {
+    responses: {
+      '200': {
+        description: 'User',
+        content: {
+          schema: getJsonSchemaRef(User).$ref,
+----------
+
+
+==================================================
+
+npm start
+
+agar ada schema result token , maka harus edit :
+
+pada 
+----------
+  //----------------- Creating Login Route
+  @post('/users/login')
+
+
+----------
+
+
+ubah menjadi 
+----------
+  @post('/users/login', {
+    responses: {
+      '200': {
+        description: 'Token',
+        content: {
+         'aplication/json': {
+           schema: {
+             type: 'object',
+             properties: {
+               token : {
+                 type: 'string',
+                 
+               }
+             }
+           }
+         }
+        }
+      }
+    }
+  })
+----------
+
+buatlh folder specs di dalam folder controller
+\src\controllers\specs\user.controller.spec.ts
+-----------
+
+export const CredentialsSchema = {
+    type: 'object',
+    required: ['email', 'password'],
+    properties: {
+      email: {
+        type: 'string',
+        format: 'email',
+      },
+      password: {
+        type: 'string',
+        minLength: 8,
+      },
+    },
+  };
+  
+
+  //export const CredentialsRequestBody  = {
+  // EKI EDIT  : any agar ga rewel di panggil
+  export const CredentialsRequestBody : any = {
+    description: 'The input of login function',
+    required: true,
+    content: {
+      'application/json': {schema: CredentialsSchema},
+    },
+  };
+-----------
+
+
+ubahlah async login pada
+\src\controllers\user.controller.ts
+-----------
+  async login(@requestBody() credentials : Credentials): Promise<{token: string}>{
+    return Promise.resolve({token : '12312311adadasdasda'})
+  }
+-----------
+
+
+
+
+
+menjadi
+\src\controllers\user.controller.ts
+-----------
+import  * as UCS from "./specs/user.controller.spec";
+..
+
+
+
+..
+    async login(
+      @requestBody(UCS.CredentialsRequestBody) credentials: Credentials,
+    ): Promise<{token: string}> {
+    return Promise.resolve({token : '12312311adadasdasda'})
+  }
+..
+
+
+atau
+
+
+import { CredentialsRequestBody } from "./specs/user.controller.spec";
+..
+
+
+..
+    async login(
+      @requestBody(CredentialsRequestBody) credentials: Credentials,
+    ): Promise<{token: string}> {
+    return Promise.resolve({token : '12312311adadasdasda'})
+  }
+..
+-----------
+
+
+===============================================
+// project yang mirip ada di :
+
+D:\_FILE_PC_ANG_PROJECT\_example\lb4-jwt-tutorial\src\controllers\specs
+
+===============================================
+
+===========  //AGAR DAPAT MENGELUARKAN TOKEN  (USER LOGIN BLM DI VALIDASI)
+
+
+
+

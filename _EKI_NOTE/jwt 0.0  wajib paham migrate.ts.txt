@@ -1,0 +1,156 @@
+Installing MysQL
+
+
+pada menit 10:45 , kenapa merubah migrateschema ?
+karena ketika tidak memiliki tabel pada mysql database akan error makanya  app.migrateSchema({existingSchema,   harus di rubah
+
+
+  // Connectors usually keep a pool of opened connections,
+  // this keeps the process running even after all work is done.
+  // We need to exit explicitly.
+
+
+makanya di baca ijo2nya
+
+
+---------- solusi jika tabel tidak ada pada mysql, dan alangkah baiknya jika di static
+
+  const existingSchema = args.includes('--rebuild') ? 'drop' : 'alter';
+  console.log('Migrating schemas (%s existing schema)', existingSchema);
+
+  const app = new Rnd1Application();
+  await app.boot();
+  await app.migrateSchema({existingSchema,
+    //  models : ['User','TblData']
+    // bukan panggil model name tbl-data atau tbl_data 
+    // melainkan panggil classnya  yg ada di model.ts nya 
+    // TblData  
+ // ternyata   await app.migrateSchema({existingSchema, models : ['User','TblData']   adalah
+// ketika tabel tidak ada maka dia akan membuat TblData pada mysql
+
+  });
+
+---------- solusi jika tabel tidak ada pada mysql
+
+
+
+juga sama pada  Implement HasMany Relationship between Models  2:57
+
+
+
+
+
+atau SOLUSINYA pilih salah 1 untuk static tabel name:
+
+0. 
+mysql://root:masuk123@192.168.1.107/rnd1
+
+untuk datasource : 
+{
+  "name": "ds",
+  "connector": "mysql",
+  "url": "mysql://root:pass@localhost/testdb",
+  "host": "",
+  "port": 0,
+  "user": "",
+  "password": "",
+  "database": ""
+}
+
+// jika value di isi semua  url ga perlu di isi
+// jika url di isi value seua ga perlu di isi
+
+untuk model :
+
+@model({
+  settings: {
+    mysql: {
+      table: 'customer',
+    },
+  },
+})
+
+//  settings: {
+//    mysql:  <----- ini adalah connectorname yang ada pada datasource
+
+export class Abc extends Entity {
+  @property({
+    type: 'string',
+    id: true,
+    mysql: {
+      columnName: 'custid',
+    },
+  })
+  id?: string;
+
+  @property({
+    type: 'string',
+    mysql: {
+      columnName: 'name',
+    },
+  })
+  abcname?: string;
+
+
+1. pada model.ts
+@model({
+name:'tbl_user'
+})
+
+tidak merubah migrate.ts
+
+
+
+settings: { postgresql: { schema: 'public', table: 'inventory'} },
+
+
+2.
+https://github.com/strongloop/loopback-next/issues/2957
+@model({
+  settings: { postgresql: { schema: 'public', table: 'inventory'} },
+})
+
+
+
+atau
+@model({
+  settings: {
+    postgresql: {
+      table: 'tbl_barang',
+    },
+  },
+})
+tidak merubah migrate.ts
+
+
+3. atau static  di migrate.ts tapi ga support tablename yang menggunakan _
+pada yg ke 3 ini ketika tabel tidak ada maka akan otomatis membuatnya
+---------------
+const existingSchema = args.includes('--rebuild') ? 'drop' : 'alter';
+  console.log('Migrating schemas (%s existing schema)', existingSchema);
+
+  const app = new Rnd1Application();
+  await app.boot();
+  await app.migrateSchema({existingSchema,
+    //models : ['User'],
+    // bukan panggil tbl-data atau tbl_datanya
+    // melainkan panggil classnyayg ada di model.ts nya 
+    //TblData
+ // ternyata   await app.migrateSchema({existingSchema, models : ['User','TblData']   adalah
+// ketika tabel tidak ada maka dia akan membuat TblData pada mysql
+      models : ['User','TblData']
+
+  });
+
+  // Connectors usually keep a pool of opened connections,
+  // this keeps the process running even after all work is done.
+  // We need to exit explicitly.
+  process.exit(0);
+---------------
+
+
+
+
+npm run migrate
+       npm run build   -- not use run build udah auto run migrate
+npm run start

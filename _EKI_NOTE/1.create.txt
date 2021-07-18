@@ -1,0 +1,42 @@
+npm cache clean --force
+
+lb4
+
+rnd1
+
+enter2
+
+
+
+
+-------
+
+
+lb4 model Product
+
+
+
+id
+number
+id property yes
+it req  yes
+deault value  <enter>
+
+
+
+title 
+string
+yes
+<enter>
+
+qty
+number
+yes
+<enter>
+
+price
+number
+no
+<enter>
+
+<enter><enter>
